@@ -27,7 +27,7 @@ const alfredBot: Bot = {
 };
 
 const botijinBot: Bot = {
-    id: 6169444370,
+    id: 773913620,
     secret: process.env.BOTIJIN_BOT,
     defaultName: 'Botijín',
     username: 'spacecowboys_bot',
