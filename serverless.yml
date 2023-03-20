@@ -15,6 +15,7 @@ provider:
     TORRENTE_BOT: ${param:torrente_bot}
     SIGMUND_BOT: ${param:sigmund_bot}
     ALFRED_BOT: ${param:alfred_bot}
+    BOTIJIN_BOT: ${param:botijin_bot}
 
 package:
   patterns:

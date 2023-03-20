@@ -26,4 +26,11 @@ const alfredBot: Bot = {
     username: 'AlfredMayordomoBot',
 };
 
-export const bots: Bot[] = [torrenteBot, alfredBot, sigmundBot];
+const botijinBot: Bot = {
+    id: 6169444370,
+    secret: process.env.BOTIJIN_BOT,
+    defaultName: 'Botijín',
+    username: 'spacecowboys_bot',
+};
+
+export const bots: Bot[] = [torrenteBot, alfredBot, sigmundBot, botijinBot];
