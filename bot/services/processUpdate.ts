@@ -92,8 +92,7 @@ export const processUpdate = async (
   });
   //prepare openAI prompt
   const prompt = preparePrompt(lastMessages, validConfig, bot);
-  console.log("Prompt", prompt);
-
+  console.log("Prompt ready");
   //call openAI
   const gptResponse = await getGptResponse({ prompt, chatConfig: validConfig });
   console.log("GPT Response", gptResponse);
@@ -138,10 +137,10 @@ export const processUpdate = async (
 };
 
 const trimUserNameFromMessage = (input:string) => {
-  const regex = /^(\S+\s){0,4}\S+:\s?(.*)$/;
+  const regex = /^((?:\S+\s){0,3}\S+)\s?:\s?([\s\S]*)$/;
   const result = input.match(regex);
 
-  return result && result.length > 1 && result[1] ? result[1] : input;
+  return result && result.length > 1 && result[2] ? result[2] : input;
 };
 
 const shouldSpeak = (message: TelegramMessage, chatConfig: Chat, bot: Bot) => {

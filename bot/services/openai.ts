@@ -51,6 +51,7 @@ export const getGptResponse = async (
       presence_penalty: chatConfig.presence_penalty,
       model: chatConfig.model,
     });
+    console.log("OpenAI Request", body)
     const response = await fetch(`https://api.openai.com/v1/chat/completions`, {
       method: "POST",
       headers: {
