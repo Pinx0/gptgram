@@ -1,4 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import {bots} from "./bot/config/bots";
+import {processUpdate} from "./bot/services/processUpdate";
+import {Update} from "@grammyjs/types";
 
 /**
  *
@@ -10,14 +13,42 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
  *
  */
 
-export const hello = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const processMessage = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
-    console.log(event);
-
+    const secret = event.headers["x-telegram-bot-api-secret-token"];
+    const bot = secret ? bots.find((b) => b.secret === secret) : undefined;
+    if (!bot) {
+      console.log("Invalid bot", secret);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Invalid bot",
+        }),
+      }
+    }
+    if(!event.body) {
+      console.log("Invalid body", secret);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Invalid body."
+        }),
+      }
+    }
+    const update = JSON.parse(event.body) as Update;
+    const result = await processUpdate(bot, update);
+    if ("error" in result) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: result.error,
+        }),
+      }
+    }
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: 'hello world!!!!',
+        message: 'hello world',
       }),
     };
   } catch (err) {

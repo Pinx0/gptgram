@@ -1,4 +1,4 @@
-import { Message, MessageType, Prisma, PrismaClient } from "@prisma/client";
+import { Message, MessageType, Prisma, PrismaClient } from '../../generated/client'
 import type { CreateMessage } from "./converter";
 import type { GptValidResponse } from "./openai";
 import type { Bot } from "../config/bots";

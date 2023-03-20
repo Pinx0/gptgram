@@ -137,11 +137,11 @@ export const processUpdate = async (
   return { ok: { messageSent: true } };
 };
 
-const trimUserNameFromMessage = (input: string) => {
-  const regex = /^((?:\S+\s){0,4}\S+)\s?:\s?(.*)$/;
+const trimUserNameFromMessage = (input:string) => {
+  const regex = /^(\S+\s){0,4}\S+:\s?(.*)$/;
   const result = input.match(regex);
 
-  return result && result.length > 2 && result[2] ? result[2] : input;
+  return result && result.length > 1 && result[1] ? result[1] : input;
 };
 
 const shouldSpeak = (message: TelegramMessage, chatConfig: Chat, bot: Bot) => {

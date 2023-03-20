@@ -1,5 +1,5 @@
 import type { Message } from "@grammyjs/types";
-import { ChatType, MessageType } from "@prisma/client";
+import { ChatType, MessageType } from '../../generated/client'
 import type { Bot } from "../config/bots";
 
 const chatTypeConverter = {

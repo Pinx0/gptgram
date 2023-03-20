@@ -9,10 +9,20 @@ provider:
   region: eu-west-3
   apiName: gptgram-api
   stage: prod
+  environment:
+    DATABASE_URL: ${param:database_url}
+    SHADOW_DATABASE_URL: ${param:shadow_database_url}
+
+package:
+  patterns:
+    - "schema.prisma"
+    - "libquery_engine-rhel-*"
 
 functions:
-  hello:
-    handler: handler.hello
+  processMessage:
+    handler: handler.processMessage
+    memorySize: 256
+    timeout: 25
     events:
       - httpApi:
           method: POST

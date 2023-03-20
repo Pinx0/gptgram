@@ -1,5 +1,4 @@
-import type { Chat, User } from "@prisma/client";
-import type { Message } from "@prisma/client";
+import type { Chat, User, Message } from '../../generated/client'
 import type { Bot } from "../config/bots";
 
 type GptMessage = { role: "system" | "user" | "assistant"; content: string };
