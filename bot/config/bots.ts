@@ -1,29 +1,29 @@
 export type Bot = {
-  id: number;
-  secret: string;
-  defaultName: string;
-  username: string;
+    id: number;
+    secret: string | undefined;
+    defaultName: string;
+    username: string;
 };
 
 const torrenteBot: Bot = {
-  id: 6001219979,
-  secret: "AAFw6gVr1oD9OPCd6O9hvooaByAoVTG7bVo",
-  defaultName: "Torrente",
-  username: "JLTorrenteBot",
+    id: 6001219979,
+    secret: process.env.TORRENTE_BOT,
+    defaultName: 'Torrente',
+    username: 'JLTorrenteBot',
 };
 
 const sigmundBot: Bot = {
-  id: 878538078,
-  secret: "AAEFZqpnPyx_6MESh5p0eVCvNWQf_i2rv2A",
-  defaultName: "Sigmund Freud",
-  username: "Sigmund_Freud_Bot",
+    id: 878538078,
+    secret: process.env.SIGMUND_BOT,
+    defaultName: 'Sigmund Freud',
+    username: 'Sigmund_Freud_Bot',
 };
 
 const alfredBot: Bot = {
-  id: 6169444370,
-  secret: "AAFTfq-b1eFxDB_epHEYnzoa6W4J7s4hh4M",
-  defaultName: "Alfred",
-  username: "AlfredMayordomoBot",
+    id: 6169444370,
+    secret: process.env.ALFRED_BOT,
+    defaultName: 'Alfred',
+    username: 'AlfredMayordomoBot',
 };
 
 export const bots: Bot[] = [torrenteBot, alfredBot, sigmundBot];

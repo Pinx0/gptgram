@@ -12,6 +12,9 @@ provider:
   environment:
     DATABASE_URL: ${param:database_url}
     SHADOW_DATABASE_URL: ${param:shadow_database_url}
+    TORRENTE_BOT: ${param:torrente_bot}
+    SIGMUND_BOT: ${param:sigmund_bot}
+    ALFRED_BOT: ${param:alfred_bot}
 
 package:
   patterns:
