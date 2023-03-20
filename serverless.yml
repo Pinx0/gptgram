@@ -1,0 +1,22 @@
+org: pinx0
+app: gptgram
+service: gptgram
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-west-3
+  apiName: gptgram-api
+  stage: prod
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          method: POST
+          path: /gptgram/message
+
+plugins:
+  - serverless-esbuild
