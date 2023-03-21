@@ -2,7 +2,7 @@ import type { Message as TelegramMessage, Update } from '@grammyjs/types';
 import { FromTelegramToCreateMessageCommand } from './converter';
 import { createMessage, getChatConfig, getLastClear, getLastMessages, saveCompletion } from './database';
 import { sendMessage } from './telegram';
-import type { Chat } from '@prisma/client';
+import type { Chat } from '../../generated/client';
 import type { Bot } from '../config/bots';
 import { getGptResponse, preparePrompt, validateConfig } from './openai';
 
@@ -23,7 +23,6 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
             error: 'Invalid update',
         };
     }
-    const replyToMessage = message.reply_to_message;
     const chat = message.chat;
     const chat_id = chat.id;
 
@@ -51,7 +50,7 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
 
     //check if should respond
     const speak = shouldSpeak(message, chatConfig, bot);
-    if (!speak) return { ok: { messageSent: false } };
+    if (!speak.send) return { ok: { messageSent: false } };
     //check errors in config
     const validationResult = validateConfig(chatConfig);
     if ('errors' in validationResult) {
@@ -64,7 +63,7 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
             token,
             chat_id,
             text: responseToUser,
-            reply_to_message_id: replyToMessage?.message_id,
+            reply_to_message_id: speak.reply ? message.message_id : undefined,
         });
         console.log('Telegram Response', telegramResponse);
 
@@ -95,7 +94,7 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
                 token,
                 chat_id,
                 text: responseToUser,
-                reply_to_message_id: replyToMessage?.message_id,
+                reply_to_message_id: speak.reply ? message.message_id : undefined,
             });
             console.log('Telegram Response', telegramResponse);
             return { ok: { messageSent: true } };
@@ -112,7 +111,7 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
         token,
         chat_id,
         text: responseToUser,
-        reply_to_message_id: replyToMessage?.message_id,
+        reply_to_message_id: message.message_id,
     });
     console.log('Telegram Response', telegramResponse);
     const botMessage = telegramResponse.response?.result as TelegramMessage.TextMessage;
@@ -133,17 +132,17 @@ const trimUserNameFromMessage = (input: string) => {
 const shouldSpeak = (message: TelegramMessage, chatConfig: Chat, bot: Bot) => {
     if (message.chat.type === 'private') {
         console.log('Is private chat');
-        return true;
+        return { send: true, reply: false };
     }
     if (message.reply_to_message?.from?.id && BigInt(message.reply_to_message?.from?.id) === chatConfig.bot_id) {
         console.log('Is replying to bot message');
-        return true;
+        return { send: true, reply: true };
     }
     if (message.text && message.text.includes(bot.username)) {
         console.log('Is mentioning the bot');
-        return true;
+        return { send: true, reply: true };
     }
     const dice = Math.random();
     console.log(`Dice: ${dice} - Speak chance: ${chatConfig.speak_chance}`);
-    return dice < chatConfig.speak_chance;
+    return { send: dice < chatConfig.speak_chance, reply: false };
 };
