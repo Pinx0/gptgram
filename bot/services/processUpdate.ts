@@ -111,7 +111,7 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
         token,
         chat_id,
         text: responseToUser,
-        reply_to_message_id: message.message_id,
+        reply_to_message_id: speak.reply ? message.message_id : undefined,
     });
     console.log('Telegram Response', telegramResponse);
     const botMessage = telegramResponse.response?.result as TelegramMessage.TextMessage;
