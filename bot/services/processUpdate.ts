@@ -72,7 +72,11 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
     const validConfig = validationResult.validConfig;
 
     //get last N messages from DB
-    const lastClear = await getLastClear({ chat_id, bot_id: bot.id });
+    const lastClear = await getLastClear({
+        chat_id,
+        bot_id: bot.id,
+        reply_to_message_id: message.reply_to_message?.message_id,
+    });
     console.log('Last clear', lastClear);
     const lastMessages = await getLastMessages({
         chat_id,
@@ -130,6 +134,10 @@ const trimUserNameFromMessage = (input: string) => {
 };
 
 const shouldSpeak = (message: TelegramMessage, chatConfig: Chat, bot: Bot) => {
+    if (message.text?.startsWith('/')) {
+        console.log('Is command');
+        return { send: false, reply: false };
+    }
     if (message.chat.type === 'private') {
         console.log('Is private chat');
         return { send: true, reply: false };
