@@ -75,7 +75,7 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
     const lastClear = await getLastClear({
         chat_id,
         bot_id: bot.id,
-        reply_to_message_id: message.reply_to_message?.message_id,
+        reply_to_message_id: speak.origin === 'mention' ? message.reply_to_message?.message_id : undefined,
     });
     console.log('Last clear', lastClear);
     const lastMessages = await getLastMessages({
@@ -136,21 +136,21 @@ const trimUserNameFromMessage = (input: string) => {
 const shouldSpeak = (message: TelegramMessage, chatConfig: Chat, bot: Bot) => {
     if (message.text?.startsWith('/')) {
         console.log('Is command');
-        return { send: false, reply: false };
+        return { send: false, reply: false, origin: 'command' };
     }
     if (message.chat.type === 'private') {
         console.log('Is private chat');
-        return { send: true, reply: false };
+        return { send: true, reply: false, origin: 'private' };
     }
     if (message.reply_to_message?.from?.id && BigInt(message.reply_to_message?.from?.id) === chatConfig.bot_id) {
         console.log('Is replying to bot message');
-        return { send: true, reply: true };
+        return { send: true, reply: true, origin: 'reply' };
     }
     if (message.text && message.text.includes(bot.username)) {
         console.log('Is mentioning the bot');
-        return { send: true, reply: true };
+        return { send: true, reply: true, origin: 'mention' };
     }
     const dice = Math.random();
     console.log(`Dice: ${dice} - Speak chance: ${chatConfig.speak_chance}`);
-    return { send: dice < chatConfig.speak_chance, reply: false };
+    return { send: dice < chatConfig.speak_chance, reply: false, origin: 'spontaneous' };
 };
