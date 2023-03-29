@@ -75,7 +75,7 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
     const lastClear = await getLastClear({
         chat_id,
         bot_id: bot.id,
-        reply_to_message_id: speak.origin === 'mention' ? message.reply_to_message?.message_id : undefined,
+        reply_to_message_id: speak.origin === 'mention' ? message.message_id : undefined,
     });
     console.log('Last clear', lastClear);
     const lastMessages = await getLastMessages({
