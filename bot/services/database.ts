@@ -23,9 +23,13 @@ type QueryLastMessages = {
 type QueryLastClear = {
     chat_id: number;
     bot_id: number;
-    reply_to_message_id?: number;
 };
-export const getLastClear = async ({ chat_id, bot_id, reply_to_message_id }: QueryLastClear) => {
+type QueryByMessageId = {
+    chat_id: number;
+    bot_id: number;
+    message_id: number;
+};
+export const getByMessageId = async ({ chat_id, bot_id, message_id }: QueryByMessageId) => {
     return database.message.findFirst({
         orderBy: [
             {
@@ -33,22 +37,24 @@ export const getLastClear = async ({ chat_id, bot_id, reply_to_message_id }: Que
             },
         ],
         where: {
-            OR: [
-                {
-                    AND: {
-                        chat_id: { equals: chat_id },
-                        bot_id: { equals: bot_id },
-                        content: { startsWith: '/clear' },
-                    },
-                },
-                {
-                    AND: {
-                        chat_id: { equals: chat_id },
-                        bot_id: { equals: bot_id },
-                        message_id: { equals: reply_to_message_id ?? -1 },
-                    },
-                },
-            ],
+            chat_id: { equals: chat_id },
+            bot_id: { equals: bot_id },
+            message_id: { equals: message_id ?? -1 },
+        },
+    });
+};
+
+export const getLastClear = async ({ chat_id, bot_id }: QueryLastClear) => {
+    return database.message.findFirst({
+        orderBy: [
+            {
+                date: 'desc',
+            },
+        ],
+        where: {
+            chat_id: { equals: chat_id },
+            bot_id: { equals: bot_id },
+            content: { startsWith: '/clear' },
         },
     });
 };

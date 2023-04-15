@@ -1,6 +1,13 @@
 import type { Message as TelegramMessage, Update } from '@grammyjs/types';
 import { FromTelegramToCreateMessageCommand } from './converter';
-import { createMessage, getChatConfig, getLastClear, getLastMessages, saveCompletion } from './database';
+import {
+    createMessage,
+    getByMessageId,
+    getChatConfig,
+    getLastClear,
+    getLastMessages,
+    saveCompletion,
+} from './database';
 import { sendMessage } from './telegram';
 import type { Chat } from '../../generated/client';
 import type { Bot } from '../config/bots';
@@ -72,17 +79,18 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
     const validConfig = validationResult.validConfig;
 
     //get last N messages from DB
-    const lastClear = await getLastClear({
+    const contextDate = await getContextStart({
         chat_id,
         bot_id: bot.id,
-        reply_to_message_id: speak.origin === 'mention' ? message.message_id : undefined,
+        origin: speak.origin,
+        message_id: message.message_id,
     });
-    console.log('Last clear', lastClear);
+
     const lastMessages = await getLastMessages({
         chat_id,
         bot_id: bot.id,
         number_of_messages: validConfig.history_length,
-        min_date: lastClear?.date,
+        min_date: contextDate,
     });
     //prepare openAI prompt
     const prompt = preparePrompt(lastMessages, validConfig, bot);
@@ -126,14 +134,61 @@ export const processUpdate = async (bot: Bot, update: Update): Promise<Result> =
     return { ok: { messageSent: true } };
 };
 
+type GetContextStartParams = {
+    chat_id: number;
+    bot_id: number;
+    origin: SpeakOrigin;
+    message_id: number;
+};
+const getContextStart = async ({ chat_id, bot_id, origin, message_id }: GetContextStartParams) => {
+    const lastClear = await getLastClear({
+        chat_id,
+        bot_id: bot_id,
+    });
+    let originalMention = message_id;
+    let originalDate = 0;
+    const oldestCap = Date.now() / 1000 - 60 * 60 * 5;
+    console.log('Last clear', lastClear);
+    if (origin === 'reply') {
+        while (true) {
+            const repliedTo = await getByMessageId({
+                chat_id,
+                bot_id,
+                message_id: originalMention,
+            });
+            if (repliedTo === null) break;
+            originalDate = repliedTo.date;
+            if (repliedTo.reply_to_message_id === null) break;
+            originalMention = Number(repliedTo.reply_to_message_id);
+            console.log('Checking previous message', originalMention);
+        }
+    }
+    if (origin === 'mention') {
+        const repliedTo = await getByMessageId({
+            chat_id,
+            bot_id,
+            message_id: originalMention,
+        });
+        console.log('Answering to mention', [repliedTo?.date, lastClear?.date, oldestCap]);
+        return repliedTo?.date ?? lastClear?.date ?? oldestCap;
+    }
+    console.log('Including in context up to...', [lastClear?.date, oldestCap, originalDate]);
+    return Math.max(lastClear?.date ?? oldestCap, originalDate);
+};
+
 const trimUserNameFromMessage = (input: string) => {
     const regex = /^((?:\S+\s){0,3}\S+)\s?:\s?([\s\S]*)$/;
     const result = input.match(regex);
 
     return result && result.length > 1 && result[2] ? result[2] : input;
 };
-
-const shouldSpeak = (message: TelegramMessage, chatConfig: Chat, bot: Bot) => {
+export type SpeakOrigin = 'command' | 'private' | 'mention' | 'reply' | 'spontaneous';
+type ShouldSpeakResult = {
+    origin: SpeakOrigin;
+    send: boolean;
+    reply: boolean;
+};
+const shouldSpeak = (message: TelegramMessage, chatConfig: Chat, bot: Bot): ShouldSpeakResult => {
     if (message.text?.startsWith('/')) {
         console.log('Is command');
         return { send: false, reply: false, origin: 'command' };
