@@ -11,6 +11,7 @@ provider:
   stage: prod
   environment:
     DATABASE_URL: ${param:database_url}
+    DEPLOYMENT_URL: ${param:deployment_url}
     SHADOW_DATABASE_URL: ${param:shadow_database_url}
     TORRENTE_BOT: ${param:torrente_bot}
     SIGMUND_BOT: ${param:sigmund_bot}

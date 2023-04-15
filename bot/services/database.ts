@@ -5,6 +5,9 @@ import type { Bot } from '../config/bots';
 
 export const database = new PrismaClient();
 
+type QueryOtherChatConfig = {
+    chat_id: number;
+};
 type QueryChatConfig = {
     chat_id: number;
     bot_id: number;
@@ -88,6 +91,13 @@ export const getChatConfig = async ({ chat_id, bot_id }: QueryChatConfig) => {
                 chat_id,
                 bot_id,
             },
+        },
+    });
+};
+export const getOtherChatConfig = async ({ chat_id }: QueryOtherChatConfig) => {
+    return database.chat.findMany({
+        where: {
+            chat_id,
         },
     });
 };

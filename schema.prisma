@@ -71,24 +71,25 @@ model Message {
 }
 
 model Chat {
-  id                Int          @id @default(autoincrement())
-  chat_id           BigInt
-  bot_id            BigInt
-  type              ChatType
-  title             String
-  speak_chance      Float        @default(0)
-  bot_name          String
-  personality       String?      @db.Text
-  first_message     String?      @db.Text
-  model             String       @default("gpt-3.5-turbo")
-  history_length    Int
-  api_key           String?
-  token_limit       Int
-  temperature       Float
-  frequency_penalty Float
-  presence_penalty  Float
-  messages          Message[]
-  completions       Completion[]
+  id                   Int          @id @default(autoincrement())
+  chat_id              BigInt
+  bot_id               BigInt
+  type                 ChatType
+  title                String
+  speak_chance         Float        @default(0)
+  bot_name             String
+  personality          String?      @db.Text
+  first_message        String?      @db.Text
+  model                String       @default("gpt-3.5-turbo")
+  history_length       Int
+  api_key              String?
+  token_limit          Int
+  temperature          Float
+  frequency_penalty    Float
+  presence_penalty     Float
+  interact_with_bot_id BigInt       @default(0)
+  messages             Message[]
+  completions          Completion[]
 
   @@unique([chat_id, bot_id])
 }

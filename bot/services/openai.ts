@@ -67,7 +67,12 @@ type MessageWithUser = Message & {
     user: User;
 };
 
-export const preparePrompt = (chatMessages: MessageWithUser[], chatConfig: Chat, bot: Bot): Prompt => {
+export const preparePrompt = (
+    chatMessages: MessageWithUser[],
+    chatConfig: Chat,
+    allConfigs: Chat[],
+    bot: Bot,
+): Prompt => {
     const messages: GptMessage[] = [];
     //add system message
     messages.push({
@@ -87,7 +92,12 @@ export const preparePrompt = (chatMessages: MessageWithUser[], chatConfig: Chat,
         .map((m) => {
             const isBotMessage = m.user_id === BigInt(bot.id);
             const role = isBotMessage ? 'assistant' : 'user';
-            const name = isBotMessage ? chatConfig.bot_name : m.user.first_name;
+            const specificConfig = allConfigs.find((x) => x.bot_id === m.user_id);
+            const name = isBotMessage
+                ? chatConfig.bot_name
+                : specificConfig
+                ? specificConfig.bot_name
+                : m.user.first_name;
             const processedMessage = name + ': ' + m.content.replace(bot.username, chatConfig.bot_name);
 
             messages.push({
